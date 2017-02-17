@@ -4,6 +4,10 @@
 #include "layer.h"
 #include "network.h"
 
+#if defined (__cplusplus)
+extern "C" {
+#endif
+
 layer make_region_layer(int batch, int h, int w, int n, int classes, int coords);
 void forward_region_layer(const layer l, network_state state);
 void backward_region_layer(const layer l, network_state state);
@@ -15,4 +19,7 @@ void forward_region_layer_gpu(const layer l, network_state state);
 void backward_region_layer_gpu(layer l, network_state state);
 #endif
 
+#if defined(__cplusplus)
+}
+#endif
 #endif

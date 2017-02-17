@@ -4,6 +4,10 @@
 #include "layer.h"
 #include "network.h"
 
+#if defined (__cplusplus)
+extern "C" {
+#endif
+
 typedef layer detection_layer;
 
 detection_layer make_detection_layer(int batch, int inputs, int n, int size, int classes, int coords, int rescore);
@@ -16,4 +20,7 @@ void forward_detection_layer_gpu(const detection_layer l, network_state state);
 void backward_detection_layer_gpu(detection_layer l, network_state state);
 #endif
 
+#if defined (__cplusplus)
+}
+#endif
 #endif

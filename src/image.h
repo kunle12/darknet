@@ -8,6 +8,10 @@
 #include <math.h>
 #include "box.h"
 
+#ifdef OPENCV
+#include <opencv2/core/core_c.h>
+#endif
+
 typedef struct {
     int h;
     int w;
@@ -50,6 +54,10 @@ void rgbgr_image(image im);
 void constrain_image(image im);
 void composite_3d(char *f1, char *f2, char *out, int delta);
 int best_3d_shift_r(image a, image b, int min, int max);
+
+#ifdef OPENCV
+image ipl_to_image(IplImage* src);
+#endif
 
 image grayscale_image(image im);
 image threshold_image(image im, float thresh);
