@@ -5,12 +5,17 @@ set(CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH} "${PROJECT_SOURCE_DIR}/CMake")
 set(CMAKE_LIBRARY_OUTPUT_DIRECTORY ${PROJECT_SOURCE_DIR}/lib)
 ## Compiler settings
 
+option(CPUOnly "CPUOnly" OFF)
+
 #thread
 FIND_PACKAGE(Threads)
 list(APPEND LIBRARIES ${CMAKE_THREAD_LIBS_INIT})
 
 # CUDA
+if (NOT CPUOnly)
 FIND_PACKAGE(CUDA)
+endif()
+
 if (CUDA_FOUND)
     message(STATUS "CUDA Version: " ${CUDA_VERSION_STRINGS})
     message(STATUS "CUDA Libararies: " ${CUDA_LIBRARIES})
@@ -52,8 +57,8 @@ message(STATUS "CUDA FOUND")
 cuda_add_library(${PROJECT_NAME} SHARED ${SRC_FILES} ${CU_SRC_FILES})
 target_link_libraries(${PROJECT_NAME} ${LIBRARIES} ${OpenCV_LIBS})
 else ()
-add_library(${PROJECT_NAME} SHARED ${SRC_FILES} ${CU_SRC_FILES})
-target_link_libraries(${PROJECT_NAME} ${LIBRARIES})
+add_library(${PROJECT_NAME} SHARED ${SRC_FILES})
+target_link_libraries(${PROJECT_NAME} ${LIBRARIES} ${OpenCV_LIBS})
 endif()
 
 install(TARGETS ${PROJECT_NAME} LIBRARY DESTINATION lib)
