@@ -1,26 +1,35 @@
+# Compiled Object files
+*.slo
+*.lo
 *.o
-*.dSYM
-*.csv
-*.out
-*.png
-*.jpg
-old/
-mnist/
-data/
-caffe/
-grasp/
-images/
-opencv/
-convnet/
-decaf/
-submission/
-cfg/
-darknet
-.fuse*
+*.obj
 
-# OS Generated #
-.DS_Store*
-ehthumbs.db
-Icon?
-Thumbs.db
-*.swp
+# Precompiled Headers
+*.gch
+*.pch
+
+# Compiled Dynamic libraries
+*.so
+*.dylib
+*.dll
+
+# Fortran module files
+*.mod
+
+# Compiled Static libraries
+*.lai
+*.la
+*.a
+*.lib
+
+# Executables
+*.exe
+*.out
+*.app
+
+*.*~
+package
+*.pyc
+
+# buiild directories
+build*
