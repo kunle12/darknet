@@ -34,7 +34,7 @@ else()
 endif()
 
 #BOOST
-FIND_PACKAGE(OpenCV REQUIRED)
+FIND_PACKAGE(OpenCV 2.4.12 REQUIRED)
 
 add_definitions(-DOPENCV)
 
