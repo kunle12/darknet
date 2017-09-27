@@ -1,12 +1,4 @@
-#include "network.h"
-#include "cost_layer.h"
-#include "utils.h"
-#include "parser.h"
-
-#ifdef OPENCV
-#include "opencv2/highgui/highgui_c.h"
-image get_image_from_stream(CvCapture *cap);
-#endif
+#include "darknet.h"
 
 void extract_voxel(char *lfile, char *rfile, char *prefix)
 {
@@ -47,7 +39,7 @@ void extract_voxel(char *lfile, char *rfile, char *prefix)
 void train_voxel(char *cfgfile, char *weightfile)
 {
     char *train_images = "/data/imagenet/imagenet1k.train.list";
-    char *backup_directory = "/home/pjreddie/backup/";
+    char *backup_directory = "/home/kunle12/backup/";
     srand(time(0));
     char *base = basecfg(cfgfile);
     printf("%s\n", base);
@@ -109,7 +101,7 @@ void train_voxel(char *cfgfile, char *weightfile)
     char buff[256];
     sprintf(buff, "%s/%s_final.weights", backup_directory, base);
     save_weights(net, buff);
-    free_network( net );
+    free_network(net);
 }
 
 void test_voxel(char *cfgfile, char *weightfile, char *filename)

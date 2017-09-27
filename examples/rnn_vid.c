@@ -1,11 +1,6 @@
-#include "network.h"
-#include "cost_layer.h"
-#include "utils.h"
-#include "parser.h"
-#include "blas.h"
+#include "darknet.h"
 
 #ifdef OPENCV
-#include "opencv2/highgui/highgui_c.h"
 image get_image_from_stream(CvCapture *cap);
 image ipl_to_image(IplImage* src);
 
@@ -76,7 +71,7 @@ float_pair get_rnn_vid_data(network * net, char **files, int n, int batch, int s
 void train_vid_rnn(char *cfgfile, char *weightfile)
 {
     char *train_videos = "data/vid/train.txt";
-    char *backup_directory = "/home/pjreddie/backup/";
+    char *backup_directory = "/home/kunle12/backup/";
     srand(time(0));
     char *base = basecfg(cfgfile);
     printf("%s\n", base);
@@ -97,14 +92,16 @@ void train_vid_rnn(char *cfgfile, char *weightfile)
     int batch = net->batch / net->time_steps;
 
     network * extractor = parse_network_cfg("cfg/extractor.cfg");
-    load_weights(extractor, "/home/pjreddie/trained/yolo-coco.conv");
+    load_weights(extractor, "/home/kunle12/trained/yolo-coco.conv");
 
     while(get_current_batch(net) < net->max_batches){
         i += 1;
         time=clock();
         float_pair p = get_rnn_vid_data(extractor, paths, N, batch, steps);
 
-        float loss = train_network_datum(net, p.x, p.y) / (net->batch);
+        copy_cpu(net->inputs*net->batch, p.x, 1, net->input, 1);
+        copy_cpu(net->truths*net->batch, p.y, 1, net->truth, 1);
+        float loss = train_network_datum(net) / (net->batch);
 
 
         free(p.x);
@@ -150,7 +147,7 @@ image save_reconstruction(network * net, image *init, float *feat, char *name, i
 void generate_vid_rnn(char *cfgfile, char *weightfile)
 {
     network * extractor = parse_network_cfg("cfg/extractor.recon.cfg");
-    load_weights(extractor, "/home/pjreddie/trained/yolo-coco.conv");
+    load_weights(extractor, "/home/kunle12/trained/yolo-coco.conv");
 
     network * net = parse_network_cfg(cfgfile);
     if(weightfile){

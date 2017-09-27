@@ -1,18 +1,10 @@
-#include "network.h"
-#include "detection_layer.h"
-#include "cost_layer.h"
-#include "utils.h"
-#include "parser.h"
-#include "box.h"
-
-#ifdef OPENCV
-#include "opencv2/highgui/highgui_c.h"
-#endif
+#include "darknet.h"
+#include <sys/time.h>
 
 void train_swag(char *cfgfile, char *weightfile)
 {
     char *train_images = "data/voc.0712.trainval";
-    char *backup_directory = "/home/pjreddie/backup/";
+    char *backup_directory = "/home/kunle12/backup/";
     srand(time(0));
     char *base = basecfg(cfgfile);
     printf("%s\n", base);
@@ -76,6 +68,7 @@ void train_swag(char *cfgfile, char *weightfile)
     char buff[256];
     sprintf(buff, "%s/%s_final.weights", backup_directory, base);
     save_weights(net, buff);
+    free_network(net);
 }
 
 void run_swag(int argc, char **argv)

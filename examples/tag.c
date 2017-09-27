@@ -1,17 +1,11 @@
-#include "network.h"
-#include "utils.h"
-#include "parser.h"
-
-#ifdef OPENCV
-#include "opencv2/highgui/highgui_c.h"
-#endif
+#include "darknet.h"
 
 void train_tag(char *cfgfile, char *weightfile, int clear)
 {
     srand(time(0));
     float avg_loss = -1;
     char *base = basecfg(cfgfile);
-    char *backup_directory = "/home/pjreddie/backup/";
+    char *backup_directory = "/home/kunle12/backup/";
     printf("%s\n", base);
     network * net = parse_network_cfg(cfgfile);
     if(weightfile){
@@ -21,7 +15,7 @@ void train_tag(char *cfgfile, char *weightfile, int clear)
     if(clear) *(net->seen) = 0;
     printf("Learning Rate: %g, Momentum: %g, Decay: %g\n", net->learning_rate, net->momentum, net->decay);
     int imgs = 1024;
-    list *plist = get_paths("/home/pjreddie/tag/train.list");
+    list *plist = get_paths("/home/kunle12/tag/train.list");
     char **paths = (char **)list_to_array(plist);
     printf("%d\n", plist->size);
     int N = plist->size;
@@ -65,7 +59,7 @@ void train_tag(char *cfgfile, char *weightfile, int clear)
         float loss = train_network(net, train);
         if(avg_loss == -1) avg_loss = loss;
         avg_loss = avg_loss*.9 + loss*.1;
-        printf("%d, %.3f: %f, %f avg, %f rate, %lf seconds, %d images\n", get_current_batch(net), (float)(*net->seen)/N, loss, avg_loss, get_current_rate(net), sec(clock()-time), *net->seen);
+        printf("%ld, %.3f: %f, %f avg, %f rate, %lf seconds, %ld images\n", get_current_batch(net), (float)(*net->seen)/N, loss, avg_loss, get_current_rate(net), sec(clock()-time), *net->seen);
         free_data(train);
         if(*net->seen/N > epoch){
             epoch = *net->seen/N;

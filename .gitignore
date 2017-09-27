@@ -25,11 +25,22 @@
 # Executables
 *.exe
 *.out
-*.app
-
-*.*~
-package
+*.png
+*.jpg
 *.pyc
+old/
+mnist/
+data/
+caffe/
+grasp/
+images/
+opencv/
+convnet/
+decaf/
+submission/
+cfg/
+darknet
+.fuse*
 
 # buiild directories
 build*

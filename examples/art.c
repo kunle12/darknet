@@ -1,16 +1,6 @@
-#include "network.h"
-#include "utils.h"
-#include "parser.h"
-#include "option_list.h"
-#include "blas.h"
-#include "classifier.h"
+#include "darknet.h"
+
 #include <sys/time.h>
-
-#ifdef OPENCV
-#include "opencv2/highgui/highgui_c.h"
-image get_image_from_stream(CvCapture *cap);
-#endif
-
 
 void demo_art(char *cfgfile, char *weightfile, int cam_index)
 {
@@ -28,7 +18,7 @@ void demo_art(char *cfgfile, char *weightfile, int cam_index)
 
     char *window = "ArtJudgementBot9000!!!";
     if(!cap) error("Couldn't connect to webcam.\n");
-    cvNamedWindow(window, CV_WINDOW_NORMAL); 
+    cvNamedWindow(window, CV_WINDOW_NORMAL);
     cvResizeWindow(window, 512, 512);
     int i;
     int idx[] = {37, 401, 434};
@@ -63,6 +53,7 @@ void demo_art(char *cfgfile, char *weightfile, int cam_index)
 
         cvWaitKey(1);
     }
+    free_network(net);
 #endif
 }
 

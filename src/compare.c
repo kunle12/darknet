@@ -12,7 +12,7 @@ void train_compare(char *cfgfile, char *weightfile)
     srand(time(0));
     float avg_loss = -1;
     char *base = basecfg(cfgfile);
-    char *backup_directory = "/home/pjreddie/backup/";
+    char *backup_directory = "/home/kunle12/backup/";
     printf("%s\n", base);
     network * net = parse_network_cfg(cfgfile);
     if(weightfile){
@@ -54,7 +54,7 @@ void train_compare(char *cfgfile, char *weightfile)
         float loss = train_network(net, train);
         if(avg_loss == -1) avg_loss = loss;
         avg_loss = avg_loss*.9 + loss*.1;
-        printf("%.3f: %f, %f avg, %lf seconds, %d images\n", (float)*net->seen/N, loss, avg_loss, sec(clock()-time), *net->seen);
+        printf("%.3f: %f, %f avg, %lf seconds, %ld images\n", (float)*net->seen/N, loss, avg_loss, sec(clock()-time), *net->seen);
         free_data(train);
         if(i%100 == 0){
             char buff[256];
@@ -180,7 +180,7 @@ int bbox_comparator(const void *a, const void *b)
     memcpy(X,                   im1.data, im1.w*im1.h*im1.c*sizeof(float));
     memcpy(X+im1.w*im1.h*im1.c, im2.data, im2.w*im2.h*im2.c*sizeof(float));
     float *predictions = network_predict(net, X);
-    
+
     free_image(im1);
     free_image(im2);
     free(X);
@@ -218,7 +218,7 @@ void bbox_fight(network * net, sortable_bbox *a, sortable_bbox *b, int classes, 
             bbox_update(a, b, i, result);
         }
     }
-    
+
     free_image(im1);
     free_image(im2);
     free(X);
