@@ -20,8 +20,8 @@ if (CUDA_FOUND)
     message(STATUS "CUDA Version: " ${CUDA_VERSION_STRING})
     message(STATUS "CUDA Libararies: " ${CUDA_LIBRARIES})
     include_directories(SYSTEM ${CUDA_INCLUDE_DIRS})
-    add_library(cudnn STATIC IMPORTED)
-    set_target_properties(cudnn PROPERTIES IMPORTED_LOCATION ${CUDA_TOOLKIT_ROOT_DIR}/lib64/libcudnn_static.a)
+    add_library(cudnn SHARED IMPORTED)
+    set_target_properties(cudnn PROPERTIES IMPORTED_LOCATION ${CUDA_TOOLKIT_ROOT_DIR}/lib64/libcudnn.so)
 
     list(APPEND LIBRARIES ${CUDA_LIBRARIES} ${CUDA_CUBLAS_LIBRARIES} ${CUDA_curand_LIBRARY} ${CUDA_cusparse_LIBRARY})
     list(APPEND CUDA_NVCC_FLAGS "-std=c++11;-O2;-Xcompiler \"-fPIC\" ")
@@ -61,5 +61,5 @@ endif()
 
 install(TARGETS ${PROJECT_NAME} LIBRARY DESTINATION lib)
 
-install(DIRECTORY ${PROJECT_SOURCE_DIR}/src/ DESTINATION include/darknet
-            FILES_MATCHING PATTERN "*.h" )
+install(DIRECTORY ${PROJECT_SOURCE_DIR}/include/ DESTINATION include/darknet
+            FILES_MATCHING PATTERN "*.h")

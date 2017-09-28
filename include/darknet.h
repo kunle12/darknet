@@ -32,6 +32,10 @@ extern int gpu_index;
     #endif
 #endif
 
+#ifdef OPENCV
+    #include "opencv2/core/core_c.h"
+#endif
+
 typedef struct{
     int classes;
     char **names;
@@ -634,26 +638,19 @@ void rgbgr_weights(layer l);
 image *get_weights(layer l);
 
 void demo(char *cfgfile, char *weightfile, float thresh, int cam_index, const char *filename, char **names, int classes, int frame_skip, char *prefix, int avg, float hier_thresh, int w, int h, int fps, int fullscreen);
-void get_detection_boxes(layer l, int w, int h, float thresh, float **probs, box *boxes, int only_objectness);
 
 char *option_find_str(list *l, char *key, char *def);
 int option_find_int(list *l, char *key, int def);
 
-network * parse_network_cfg(char *filename);
 void save_weights(network * net, char *filename);
-void load_weights(network * net, char *filename);
 void save_weights_upto(network * net, char *filename, int cutoff);
 void load_weights_upto(network * net, char *filename, int start, int cutoff);
 
 void zero_objectness(layer l);
-void get_region_boxes(layer l, int w, int h, int netw, int neth, float thresh, float **probs, box *boxes, float **masks, int only_objectness, int *map, float tree_thresh, int relative);
-void free_network(network * net);
-void set_batch_network(network * net, int b);
 void set_temp_network(network * net, float t);
 image load_image(char *filename, int w, int h, int c);
 image load_image_color(char *filename, int w, int h);
 image make_image(int w, int h, int c);
-image resize_image(image im, int w, int h);
 image letterbox_image(image im, int w, int h);
 image crop_image(image im, int dx, int dy, int w, int h);
 image resize_min(image im, int min);
@@ -695,7 +692,6 @@ void draw_detections(image im, int num, float thresh, box *boxes, float **probs,
 matrix network_predict_data(network * net, data test);
 image **load_alphabet();
 image get_network_image(network * net);
-float *network_predict(network * net, float *input);
 float *network_predict_p(network *net, float *input);
 
 int network_width(network *net);
@@ -708,7 +704,6 @@ box *make_boxes(network *net);
 void reset_network_state(network * net, int b);
 
 char **get_labels(char *filename);
-void do_nms_sort(box *boxes, float **probs, int total, int classes, float thresh);
 void do_nms_obj(box *boxes, float **probs, int total, int classes, float thresh);
 
 matrix make_matrix(int rows, int cols);
@@ -718,7 +713,6 @@ matrix make_matrix(int rows, int cols);
 image get_image_from_stream(CvCapture *cap);
 #endif
 #endif
-void free_image(image m);
 float train_network(network * net, data d);
 pthread_t load_data_in_thread(load_args args);
 void load_data_blocking(load_args args);
@@ -740,7 +734,6 @@ void **list_to_array(list *l);
 void top_k(float *a, int n, int k, int *index);
 int *read_map(char *filename);
 void error(const char *s);
-int max_index(float *a, int n);
 int sample_array(float *a, int n);
 void free_list(list *l);
 float mse_array(float *a, int n);
@@ -752,4 +745,26 @@ int *read_intlist(char *s, int *n, int d);
 size_t rand_size_t();
 float rand_normal();
 
+#ifdef __cplusplus
+extern "C" {
+#endif
+network * parse_network_cfg(char *filename);
+void load_weights(network * net, char *filename);
+void set_batch_network(network * net, int b);
+void get_detection_boxes(layer l, int w, int h, float thresh, float **probs, box *boxes, int only_objectness);
+void get_region_boxes(layer l, int w, int h, int netw, int neth, float thresh, float **probs, box *boxes, float **masks, int only_objectness, int *map, float tree_thresh, int relative);
+void free_network(network * net);
+image resize_image(image im, int w, int h);
+float *network_predict(network * net, float *input);
+int max_index(float *a, int n);
+void free_image(image m);
+void do_nms_sort(box *boxes, float **probs, int total, int classes, float thresh);
+
+#ifdef OPENCV
+image ipl_to_image(IplImage* src);
+#endif
+
+#ifdef __cplusplus
+}
+#endif
 #endif
