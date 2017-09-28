@@ -590,6 +590,8 @@ void test_detector(char *datacfg, char *cfgfile, char *weightfile, char *filenam
         load_weights(net, weightfile);
     }
     set_batch_network(net, 1);
+    float * orig_input = net->input;
+    float * orig_input_gpu = net->input_gpu;
     srand(2222222);
     double time;
     char buff[256];
@@ -656,6 +658,8 @@ void test_detector(char *datacfg, char *cfgfile, char *weightfile, char *filenam
         free_image(sized);
         free(boxes);
         free_ptrs((void **)probs, l.w*l.h*l.n);
+        net->input = orig_input;
+        net->input_gpu = orig_input_gpu;
         if (filename) break;
     }
     free_network( net );
