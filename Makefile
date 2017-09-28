@@ -2,7 +2,7 @@ GPU=1
 CUDNN=1
 OPENCV=1
 OPENMP=0
-DEBUG=0
+DEBUG=1
 
 ARCH= -gencode arch=compute_30,code=sm_30 \
       -gencode arch=compute_35,code=sm_35 \
@@ -78,7 +78,7 @@ $(ALIB): $(OBJS)
 	$(AR) $(ARFLAGS) $@ $^
 
 $(SLIB): $(OBJS)
-	$(CC) $(COMMON) $(CFLAGS) -shared $^ -o $@ $(LDFLAGS)
+	$(CC) $(CFLAGS) -shared $^ -o $@ $(LDFLAGS)
 
 $(OBJDIR)%.o: %.c $(DEPS)
 	$(CC) $(COMMON) $(CFLAGS) -c $< -o $@

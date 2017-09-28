@@ -668,10 +668,10 @@ void free_network(network * net)
         free_layer(net->layers[i]);
     }
     free(net->layers);
-    if(net->input) free(net->input);
+    //if(net->input) free(net->input);
     if(net->truth) free(net->truth);
 #ifdef GPU
-    if(net->input_gpu) cuda_free(net->input_gpu);
+    //if(net->input_gpu) cuda_free(net->input_gpu);
     if(net->truth_gpu) cuda_free(net->truth_gpu);
 #endif
 }
