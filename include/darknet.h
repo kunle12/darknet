@@ -651,7 +651,6 @@ void set_temp_network(network * net, float t);
 image load_image(char *filename, int w, int h, int c);
 image load_image_color(char *filename, int w, int h);
 image make_image(int w, int h, int c);
-image letterbox_image(image im, int w, int h);
 image crop_image(image im, int dx, int dy, int w, int h);
 image resize_min(image im, int min);
 image threshold_image(image im, float thresh);
@@ -679,7 +678,6 @@ void random_distort_image(image im, float hue, float saturation, float exposure)
 void fill_image(image m, float s);
 image grayscale_image(image im);
 void rotate_image_cw(image im, int times);
-double what_time_is_it_now();
 image rotate_image(image m, float rad);
 void visualize_network(network * net);
 float box_iou(box a, box b);
@@ -755,11 +753,12 @@ void get_detection_boxes(layer l, int w, int h, float thresh, float **probs, box
 void get_region_boxes(layer l, int w, int h, int netw, int neth, float thresh, float **probs, box *boxes, float **masks, int only_objectness, int *map, float tree_thresh, int relative);
 void free_network(network * net);
 image resize_image(image im, int w, int h);
+image letterbox_image(image im, int w, int h);
 float *network_predict(network * net, float *input);
 int max_index(float *a, int n);
 void free_image(image m);
 void do_nms_sort(box *boxes, float **probs, int total, int classes, float thresh);
-
+double what_time_is_it_now();
 #ifdef OPENCV
 image ipl_to_image(IplImage* src);
 #endif
