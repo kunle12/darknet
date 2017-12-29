@@ -25,15 +25,12 @@ extern int gpu_index;
     #include "opencv2/highgui/highgui_c.h"
     #include "opencv2/imgproc/imgproc_c.h"
     #include "opencv2/core/version.hpp"
+    #include "opencv2/core/core_c.h"
     #if CV_MAJOR_VERSION == 3
     #include "opencv2/videoio/videoio_c.h"
     #include "opencv2/imgcodecs/imgcodecs_c.h"
     #endif
     #endif
-#endif
-
-#ifdef OPENCV
-    #include "opencv2/core/core_c.h"
 #endif
 
 typedef struct{
@@ -759,10 +756,12 @@ int max_index(float *a, int n);
 void free_image(image m);
 void do_nms_sort(box *boxes, float **probs, int total, int classes, float thresh);
 double what_time_is_it_now();
+
 #ifdef OPENCV
+#ifndef __NVCC__
 image ipl_to_image(IplImage* src);
 #endif
-
+#endif
 #ifdef __cplusplus
 }
 #endif
