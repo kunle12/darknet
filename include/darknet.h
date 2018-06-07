@@ -585,8 +585,6 @@ typedef struct{
     float left, right, top, bottom;
 } box_label;
 
-
-network * load_network(char *cfg, char *weights, int clear);
 load_args get_base_args(network *net);
 
 void free_data(data d);
@@ -689,15 +687,15 @@ void load_weights_upto(network *net, char *filename, int start, int cutoff);
 void zero_objectness(layer l);
 void get_region_detections(layer l, int w, int h, int netw, int neth, float thresh, int *map, float tree_thresh, int relative, detection *dets);
 int get_yolo_detections(layer l, int w, int h, int netw, int neth, float thresh, int *map, int relative, detection *dets);
-void free_network(network *net);
-void set_batch_network(network *net, int b);
+//void free_network(network *net);
+//void set_batch_network(network *net, int b);
 void set_temp_network(network *net, float t);
 image load_image(char *filename, int w, int h, int c);
 image load_image_color(char *filename, int w, int h);
 image make_image(int w, int h, int c);
-image resize_image(image im, int w, int h);
+//image resize_image(image im, int w, int h);
 void censor_image(image im, int dx, int dy, int w, int h);
-image letterbox_image(image im, int w, int h);
+//image letterbox_image(image im, int w, int h);
 image crop_image(image im, int dx, int dy, int w, int h);
 image center_crop_image(image im, int w, int h);
 image resize_min(image im, int min);
@@ -738,20 +736,18 @@ void draw_detections(image im, detection *dets, int num, float thresh, char **na
 matrix network_predict_data(network *net, data test);
 image **load_alphabet();
 image get_network_image(network *net);
-float *network_predict(network *net, float *input);
+//float *network_predict(network *net, float *input);
 
 int network_width(network *net);
 int network_height(network *net);
 float *network_predict_image(network *net, image im);
 void network_detect(network *net, image im, float thresh, float hier_thresh, float nms, detection *dets);
-detection *get_network_boxes(network *net, int w, int h, float thresh, float hier, int *map, int relative, int *num);
-void free_detections(detection *dets, int n);
 
 void reset_network_state(network *net, int b);
 
 char **get_labels(char *filename);
 void do_nms_obj(detection *dets, int total, int classes, float thresh);
-void do_nms_sort(detection *dets, int total, int classes, float thresh);
+//void do_nms_sort(detection *dets, int total, int classes, float thresh);
 
 matrix make_matrix(int rows, int cols);
 
@@ -760,7 +756,7 @@ matrix make_matrix(int rows, int cols);
 image get_image_from_stream(CvCapture *cap);
 #endif
 #endif
-void free_image(image m);
+//void free_image(image m);
 float train_network(network *net, data d);
 pthread_t load_data_in_thread(load_args args);
 void load_data_blocking(load_args args);
@@ -782,7 +778,7 @@ void **list_to_array(list *l);
 void top_k(float *a, int n, int k, int *index);
 int *read_map(char *filename);
 void error(const char *s);
-int max_index(float *a, int n);
+//int max_index(float *a, int n);
 int max_int_index(int *a, int n);
 int sample_array(float *a, int n);
 int *random_index_order(int min, int max);
@@ -799,18 +795,20 @@ size_t rand_size_t();
 float rand_normal();
 float rand_uniform(float min, float max);
 
+void get_detection_boxes(layer l, int w, int h, float thresh, float **probs, box *boxes, int only_objectness);
+void get_region_boxes(layer l, int w, int h, int netw, int neth, float thresh, float **probs, box *boxes, float **masks, int only_objectness, int *map, float tree_thresh, int relative);
+
 #ifdef __cplusplus
 extern "C" {
 #endif
-network * parse_network_cfg(char *filename);
-void load_weights(network * net, char *filename);
+network * load_network(char *cfg, char *weights, int clear);
 void set_batch_network(network * net, int b);
-void get_detection_boxes(layer l, int w, int h, float thresh, float **probs, box *boxes, int only_objectness);
-void get_region_boxes(layer l, int w, int h, int netw, int neth, float thresh, float **probs, box *boxes, float **masks, int only_objectness, int *map, float tree_thresh, int relative);
 void free_network(network * net);
 image resize_image(image im, int w, int h);
 image letterbox_image(image im, int w, int h);
 float *network_predict(network * net, float *input);
+detection *get_network_boxes(network *net, int w, int h, float thresh, float hier, int *map, int relative, int *num);
+void free_detections(detection *dets, int n);
 int max_index(float *a, int n);
 void free_image(image m);
 void do_nms_sort(detection *dets, int total, int classes, float thresh);
