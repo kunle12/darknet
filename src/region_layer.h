@@ -9,7 +9,7 @@
 extern "C" {
 #endif
 
-layer make_region_layer(int batch, int h, int w, int n, int classes, int coords);
+layer make_region_layer(int batch, int w, int h, int n, int classes, int coords);
 void forward_region_layer(const layer l, network * net);
 void backward_region_layer(const layer l, network * net);
 void resize_region_layer(layer *l, int w, int h);

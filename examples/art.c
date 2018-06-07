@@ -5,10 +5,7 @@
 void demo_art(char *cfgfile, char *weightfile, int cam_index)
 {
 #ifdef OPENCV
-    network * net = parse_network_cfg(cfgfile);
-    if(weightfile){
-        load_weights(net, weightfile);
-    }
+    network *net = load_network(cfgfile, weightfile, 0);
     set_batch_network(net, 1);
 
     srand(2222222);

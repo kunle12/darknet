@@ -8,11 +8,7 @@ void train_super(char *cfgfile, char *weightfile, int clear)
     char *base = basecfg(cfgfile);
     printf("%s\n", base);
     float avg_loss = -1;
-    network * net = parse_network_cfg(cfgfile);
-    if(weightfile){
-        load_weights(net, weightfile);
-    }
-    if(clear) *net->seen = 0;
+    network *net = load_network(cfgfile, weightfile, clear);
     printf("Learning Rate: %g, Momentum: %g, Decay: %g\n", net->learning_rate, net->momentum, net->decay);
     int imgs = net->batch*net->subdivisions;
     int i = *net->seen/imgs;
@@ -71,10 +67,7 @@ void train_super(char *cfgfile, char *weightfile, int clear)
 
 void test_super(char *cfgfile, char *weightfile, char *filename)
 {
-    network * net = parse_network_cfg(cfgfile);
-    if(weightfile){
-        load_weights(net, weightfile);
-    }
+    network *net = load_network(cfgfile, weightfile, 0);
     set_batch_network(net, 1);
     srand(2222222);
 
@@ -101,6 +94,7 @@ void test_super(char *cfgfile, char *weightfile, char *filename)
         image out = get_network_image(net);
         printf("%s: Predicted in %f seconds.\n", input, sec(clock()-time));
         save_image(out, "out");
+        show_image(out, "out");
 
         free_image(im);
         if (filename) break;

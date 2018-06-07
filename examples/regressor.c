@@ -10,7 +10,7 @@ void train_regressor(char *datacfg, char *cfgfile, char *weightfile, int *gpus, 
     char *base = basecfg(cfgfile);
     printf("%s\n", base);
     printf("%d\n", ngpus);
-    network ** nets = calloc(ngpus, sizeof(network*));
+    network **nets = calloc(ngpus, sizeof(network*));
 
     srand(time(0));
     int seed = rand();
@@ -19,15 +19,11 @@ void train_regressor(char *datacfg, char *cfgfile, char *weightfile, int *gpus, 
 #ifdef GPU
         cuda_set_device(gpus[i]);
 #endif
-        nets[i] = parse_network_cfg(cfgfile);
-        if(weightfile){
-            load_weights(nets[i], weightfile);
-        }
-        if(clear) *nets[i]->seen = 0;
+        nets[i] = load_network(cfgfile, weightfile, clear);
         nets[i]->learning_rate *= ngpus;
     }
     srand(time(0));
-    network * net = nets[0];
+    network *net = nets[0];
 
     int imgs = net->batch * net->subdivisions * ngpus;
 
@@ -36,6 +32,7 @@ void train_regressor(char *datacfg, char *cfgfile, char *weightfile, int *gpus, 
 
     char *backup_directory = option_find_str(options, "backup", "/backup/");
     char *train_list = option_find_str(options, "train", "data/train.list");
+    int classes = option_find_int(options, "classes", 1);
 
     list *plist = get_paths(train_list);
     char **paths = (char **)list_to_array(plist);
@@ -47,9 +44,10 @@ void train_regressor(char *datacfg, char *cfgfile, char *weightfile, int *gpus, 
     args.w = net->w;
     args.h = net->h;
     args.threads = 32;
+    args.classes = classes;
 
-    args.min = net->min_crop;
-    args.max = net->max_crop;
+    args.min = net->min_ratio*net->w;
+    args.max = net->max_ratio*net->w;
     args.angle = net->angle;
     args.aspect = net->aspect;
     args.exposure = net->exposure;
@@ -120,10 +118,7 @@ void train_regressor(char *datacfg, char *cfgfile, char *weightfile, int *gpus, 
 
 void predict_regressor(char *cfgfile, char *weightfile, char *filename)
 {
-    network * net = parse_network_cfg(cfgfile);
-    if(weightfile){
-        load_weights(net, weightfile);
-    }
+    network *net = load_network(cfgfile, weightfile, 0);
     set_batch_network(net, 1);
     srand(2222222);
 
@@ -160,10 +155,7 @@ void demo_regressor(char *datacfg, char *cfgfile, char *weightfile, int cam_inde
 {
 #ifdef OPENCV
     printf("Regressor Demo\n");
-    network * net = parse_network_cfg(cfgfile);
-    if(weightfile){
-        load_weights(net, weightfile);
-    }
+    network *net = load_network(cfgfile, weightfile, 0);
     set_batch_network(net, 1);
 
     srand(2222222);
@@ -174,6 +166,10 @@ void demo_regressor(char *datacfg, char *cfgfile, char *weightfile, int cam_inde
     }else{
         cap = cvCaptureFromCAM(cam_index);
     }
+    list *options = read_data_cfg(datacfg);
+    int classes = option_find_int(options, "classes", 1);
+    char *name_list = option_find_str(options, "names", 0);
+    char **names = get_labels(name_list);
 
     if(!cap) error("Couldn't connect to webcam.\n");
     cvNamedWindow("Regressor", CV_WINDOW_NORMAL);
@@ -185,19 +181,23 @@ void demo_regressor(char *datacfg, char *cfgfile, char *weightfile, int cam_inde
         gettimeofday(&tval_before, NULL);
 
         image in = get_image_from_stream(cap);
-        image in_s = letterbox_image(in, net->w, net->h);
-        show_image(in, "Regressor");
+        image crop = center_crop_image(in, net->w, net->h);
+        grayscale_image_3c(crop);
+        show_image(crop, "Regressor");
 
-        float *predictions = network_predict(net, in_s.data);
+        float *predictions = network_predict(net, crop.data);
 
         printf("\033[2J");
         printf("\033[1;1H");
         printf("\nFPS:%.0f\n",fps);
 
-        printf("People: %f\n", predictions[0]);
+        int i;
+        for(i = 0; i < classes; ++i){
+            printf("%s: %f\n", names[i], predictions[i]);
+        }
 
-        free_image(in_s);
         free_image(in);
+        free_image(crop);
 
         cvWaitKey(10);
 

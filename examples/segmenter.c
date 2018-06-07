@@ -19,11 +19,8 @@ void train_segmenter(char *datacfg, char *cfgfile, char *weightfile, int *gpus, 
 #ifdef GPU
         cuda_set_device(gpus[i]);
 #endif
-        nets[i] = parse_network_cfg(cfgfile);
-        if(weightfile){
-            load_weights(nets[i], weightfile);
-        }
-        if(clear) *nets[i]->seen = 0;
+        nets[i] = load_network(cfgfile, weightfile, clear);
+        nets[i]->learning_rate *= ngpus;
     }
     srand(time(0));
     network * net = nets[0];
@@ -138,12 +135,9 @@ void train_segmenter(char *datacfg, char *cfgfile, char *weightfile, int *gpus, 
     free(base);
 }
 
-void predict_segmenter(char *datafile, char *cfgfile, char *weightfile, char *filename)
+void predict_segmenter(char *datafile, char *cfg, char *weights, char *filename)
 {
-    network * net = parse_network_cfg(cfgfile);
-    if(weightfile){
-        load_weights(net, weightfile);
-    }
+    network * net = load_network(cfg, weights, 0);
     set_batch_network(net, 1);
     srand(2222222);
 
@@ -184,14 +178,11 @@ void predict_segmenter(char *datafile, char *cfgfile, char *weightfile, char *fi
 }
 
 
-void demo_segmenter(char *datacfg, char *cfgfile, char *weightfile, int cam_index, const char *filename)
+void demo_segmenter(char *datacfg, char *cfg, char *weights, int cam_index, const char *filename)
 {
 #ifdef OPENCV
     printf("Classifier Demo\n");
-    network * net = parse_network_cfg(cfgfile);
-    if(weightfile){
-        load_weights(net, weightfile);
-    }
+    network *net = load_network(cfg, weights, 0);
     set_batch_network(net, 1);
 
     srand(2222222);
@@ -215,7 +206,7 @@ void demo_segmenter(char *datacfg, char *cfgfile, char *weightfile, int cam_inde
         image in = get_image_from_stream(cap);
         image in_s = letterbox_image(in, net->w, net->h);
 
-        float *predictions = network_predict(net, in_s.data);
+        network_predict(net, in_s.data);
 
         printf("\033[2J");
         printf("\033[1;1H");

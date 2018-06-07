@@ -7,6 +7,20 @@ typedef struct {
     float *y;
 } float_pair;
 
+unsigned char **load_files(char *filename, int *n)
+{
+    list *paths = get_paths(filename);
+    *n = paths->size;
+    unsigned char **contents = calloc(*n, sizeof(char *));
+    int i;
+    node *x = paths->front;
+    for(i = 0; i < *n; ++i){
+        contents[i] = read_file((char *)x->val);
+        x = x->next;
+    }
+    return contents;
+}
+
 int *read_tokenized_data(char *filename, size_t *read)
 {
     size_t size = 512;
@@ -52,6 +66,7 @@ char **read_tokens(char *filename, size_t *read)
     return d;
 }
 
+
 float_pair get_rnn_token_data(int *tokens, size_t *offsets, int characters, size_t len, int batch, int steps)
 {
     float *x = calloc(batch * steps * characters, sizeof(float));
@@ -68,6 +83,37 @@ float_pair get_rnn_token_data(int *tokens, size_t *offsets, int characters, size
             offsets[i] = (offsets[i] + 1) % len;
 
             if(curr >= characters || curr < 0 || next >= characters || next < 0){
+                error("Bad char");
+            }
+        }
+    }
+    float_pair p;
+    p.x = x;
+    p.y = y;
+    return p;
+}
+
+float_pair get_seq2seq_data(char **source, char **dest, int n, int characters, size_t len, int batch, int steps)
+{
+    int i,j;
+    float *x = calloc(batch * steps * characters, sizeof(float));
+    float *y = calloc(batch * steps * characters, sizeof(float));
+    for(i = 0; i < batch; ++i){
+        int index = rand()%n;
+        //int slen = strlen(source[index]);
+        //int dlen = strlen(dest[index]);
+        for(j = 0; j < steps; ++j){
+            unsigned char curr = source[index][j];
+            unsigned char next = dest[index][j];
+
+            x[(j*batch + i)*characters + curr] = 1;
+            y[(j*batch + i)*characters + next] = 1;
+
+            if(curr > 255 || curr <= 0 || next > 255 || next <= 0){
+                /*text[(index+j+2)%len] = 0;
+                printf("%ld %d %d %d %d\n", index, j, len, (int)text[index+j], (int)text[index+j+1]);
+                printf("%s", text+index);
+                */
                 error("Bad char");
             }
         }
@@ -117,25 +163,15 @@ void train_char_rnn(char *cfgfile, char *weightfile, char *filename, int clear, 
     if(tokenized){
         tokens = read_tokenized_data(filename, &size);
     } else {
-        FILE *fp = fopen(filename, "rb");
-
-        fseek(fp, 0, SEEK_END);
-        size = ftell(fp);
-        fseek(fp, 0, SEEK_SET);
-
-        text = calloc(size+1, sizeof(char));
-        fread(text, 1, size, fp);
-        fclose(fp);
+        text = read_file(filename);
+        size = strlen((const char*)text);
     }
 
     char *backup_directory = "/home/pjreddie/backup/";
     char *base = basecfg(cfgfile);
     fprintf(stderr, "%s\n", base);
     float avg_loss = -1;
-    network * net = parse_network_cfg(cfgfile);
-    if(weightfile){
-        load_weights(net, weightfile);
-    }
+    network *net = load_network(cfgfile, weightfile, clear);
 
     int inputs = net->inputs;
     fprintf(stderr, "Learning Rate: %g, Momentum: %g, Decay: %g, Inputs: %d %d %d\n", net->learning_rate, net->momentum, net->decay, inputs, net->batch, net->time_steps);
@@ -218,10 +254,7 @@ void test_char_rnn(char *cfgfile, char *weightfile, int num, char *seed, float t
     char *base = basecfg(cfgfile);
     fprintf(stderr, "%s\n", base);
 
-    network * net = parse_network_cfg(cfgfile);
-    if(weightfile){
-        load_weights(net, weightfile);
-    }
+    network *net = load_network(cfgfile, weightfile, 0);
     int inputs = net->inputs;
 
     int i, j;
@@ -275,10 +308,7 @@ void test_tactic_rnn_multi(char *cfgfile, char *weightfile, int num, float temp,
     char *base = basecfg(cfgfile);
     fprintf(stderr, "%s\n", base);
 
-    network * net = parse_network_cfg(cfgfile);
-    if(weightfile){
-        load_weights(net, weightfile);
-    }
+    network *net = load_network(cfgfile, weightfile, 0);
     int inputs = net->inputs;
 
     int i, j;
@@ -324,10 +354,7 @@ void test_tactic_rnn(char *cfgfile, char *weightfile, int num, float temp, int r
     char *base = basecfg(cfgfile);
     fprintf(stderr, "%s\n", base);
 
-    network * net = parse_network_cfg(cfgfile);
-    if(weightfile){
-        load_weights(net, weightfile);
-    }
+    network *net = load_network(cfgfile, weightfile, 0);
     int inputs = net->inputs;
 
     int i, j;
@@ -362,10 +389,7 @@ void valid_tactic_rnn(char *cfgfile, char *weightfile, char *seed)
     char *base = basecfg(cfgfile);
     fprintf(stderr, "%s\n", base);
 
-    network * net = parse_network_cfg(cfgfile);
-    if(weightfile){
-        load_weights(net, weightfile);
-    }
+    network *net = load_network(cfgfile, weightfile, 0);
     int inputs = net->inputs;
 
     int count = 0;
@@ -414,10 +438,7 @@ void valid_char_rnn(char *cfgfile, char *weightfile, char *seed)
     char *base = basecfg(cfgfile);
     fprintf(stderr, "%s\n", base);
 
-    network * net = parse_network_cfg(cfgfile);
-    if(weightfile){
-        load_weights(net, weightfile);
-    }
+    network *net = load_network(cfgfile, weightfile, 0);
     int inputs = net->inputs;
 
     int count = 0;
@@ -455,10 +476,7 @@ void vec_char_rnn(char *cfgfile, char *weightfile, char *seed)
     char *base = basecfg(cfgfile);
     fprintf(stderr, "%s\n", base);
 
-    network * net = parse_network_cfg(cfgfile);
-    if(weightfile){
-        load_weights(net, weightfile);
-    }
+    network *net = load_network(cfgfile, weightfile, 0);
     int inputs = net->inputs;
 
     int c;

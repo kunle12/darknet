@@ -6,20 +6,15 @@
 
 extern void predict_classifier(char *datacfg, char *cfgfile, char *weightfile, char *filename, int top);
 extern void test_detector(char *datacfg, char *cfgfile, char *weightfile, char *filename, float thresh, float hier_thresh, char *outfile, int fullscreen);
-extern void run_voxel(int argc, char **argv);
 extern void run_yolo(int argc, char **argv);
 extern void run_detector(int argc, char **argv);
 extern void run_coco(int argc, char **argv);
-extern void run_writing(int argc, char **argv);
 extern void run_captcha(int argc, char **argv);
 extern void run_nightmare(int argc, char **argv);
-extern void run_dice(int argc, char **argv);
-extern void run_compare(int argc, char **argv);
 extern void run_classifier(int argc, char **argv);
 extern void run_regressor(int argc, char **argv);
 extern void run_segmenter(int argc, char **argv);
 extern void run_char_rnn(int argc, char **argv);
-extern void run_vid_rnn(int argc, char **argv);
 extern void run_tag(int argc, char **argv);
 extern void run_cifar(int argc, char **argv);
 extern void run_go(int argc, char **argv);
@@ -32,8 +27,8 @@ void average(int argc, char *argv[])
     char *cfgfile = argv[2];
     char *outfile = argv[3];
     gpu_index = -1;
-    network * net = parse_network_cfg(cfgfile);
-    network * sum = parse_network_cfg(cfgfile);
+    network *net = parse_network_cfg(cfgfile);
+    network *sum = parse_network_cfg(cfgfile);
 
     char *weightfile = argv[4];
     load_weights(sum, weightfile);
@@ -83,33 +78,14 @@ void average(int argc, char *argv[])
     save_weights(sum, outfile);
 }
 
-void speed(char *cfgfile, int tics)
+long numops(network *net)
 {
-    if (tics == 0) tics = 1000;
-    network * net = parse_network_cfg(cfgfile);
-    set_batch_network(net, 1);
-    int i;
-    double time=what_time_is_it_now();
-    image im = make_image(net->w, net->h, net->c*net->batch);
-    for(i = 0; i < tics; ++i){
-        network_predict(net, im.data);
-    }
-    double t = what_time_is_it_now() - time;
-    printf("\n%d evals, %f Seconds\n", tics, t);
-    printf("Speed: %f sec/eval\n", t/tics);
-    printf("Speed: %f Hz\n", tics/t);
-}
-
-void operations(char *cfgfile)
-{
-    gpu_index = -1;
-    network * net = parse_network_cfg(cfgfile);
     int i;
     long ops = 0;
     for(i = 0; i < net->n; ++i){
         layer l = net->layers[i];
         if(l.type == CONVOLUTIONAL){
-            ops += 2l * l.n * l.size*l.size*l.c * l.out_h*l.out_w;
+            ops += 2l * l.n * l.size*l.size*l.c/l.groups * l.out_h*l.out_w;
         } else if(l.type == CONNECTED){
             ops += 2l * l.inputs * l.outputs;
         } else if (l.type == RNN){
@@ -134,6 +110,34 @@ void operations(char *cfgfile)
             ops += 2l * l.wo->inputs * l.wo->outputs;
         }
     }
+    return ops;
+}
+
+void speed(char *cfgfile, int tics)
+{
+    if (tics == 0) tics = 1000;
+    network *net = parse_network_cfg(cfgfile);
+    set_batch_network(net, 1);
+    int i;
+    double time=what_time_is_it_now();
+    image im = make_image(net->w, net->h, net->c*net->batch);
+    for(i = 0; i < tics; ++i){
+        network_predict(net, im.data);
+    }
+    double t = what_time_is_it_now() - time;
+    long ops = numops(net);
+    printf("\n%d evals, %f Seconds\n", tics, t);
+    printf("Floating Point Operations: %.2f Bn\n", (float)ops/1000000000.);
+    printf("FLOPS: %.2f Bn\n", (float)ops/1000000000.*tics/t);
+    printf("Speed: %f sec/eval\n", t/tics);
+    printf("Speed: %f Hz\n", tics/t);
+}
+
+void operations(char *cfgfile)
+{
+    gpu_index = -1;
+    network *net = parse_network_cfg(cfgfile);
+    long ops = numops(net);
     printf("Floating Point Operations: %ld\n", ops);
     printf("Floating Point Operations: %.2f Bn\n", (float)ops/1000000000.);
     free_network( net );
@@ -142,7 +146,7 @@ void operations(char *cfgfile)
 void oneoff(char *cfgfile, char *weightfile, char *outfile)
 {
     gpu_index = -1;
-    network * net = parse_network_cfg(cfgfile);
+    network *net = parse_network_cfg(cfgfile);
     int oldn = net->layers[net->n - 2].n;
     int c = net->layers[net->n - 2].c;
     scal_cpu(oldn*c, .1, net->layers[net->n - 2].weights, 1);
@@ -170,7 +174,7 @@ void oneoff(char *cfgfile, char *weightfile, char *outfile)
 void oneoff2(char *cfgfile, char *weightfile, char *outfile, int l)
 {
     gpu_index = -1;
-    network * net = parse_network_cfg(cfgfile);
+    network *net = parse_network_cfg(cfgfile);
     if(weightfile){
         load_weights_upto(net, weightfile, 0, net->n);
         load_weights_upto(net, weightfile, l, net->n);
@@ -183,22 +187,34 @@ void oneoff2(char *cfgfile, char *weightfile, char *outfile, int l)
 void partial(char *cfgfile, char *weightfile, char *outfile, int max)
 {
     gpu_index = -1;
-    network * net = parse_network_cfg(cfgfile);
-    if(weightfile){
-        load_weights_upto(net, weightfile, 0, max);
-    }
-    *net->seen = 0;
+    network *net = load_network(cfgfile, weightfile, 1);
     save_weights_upto(net, outfile, max);
     free_network(net);
+}
+
+void print_weights(char *cfgfile, char *weightfile, int n)
+{
+    gpu_index = -1;
+    network *net = load_network(cfgfile, weightfile, 1);
+    layer l = net->layers[n];
+    int i, j;
+    //printf("[");
+    for(i = 0; i < l.n; ++i){
+        //printf("[");
+        for(j = 0; j < l.size*l.size*l.c; ++j){
+            //if(j > 0) printf(",");
+            printf("%g ", l.weights[i*l.size*l.size*l.c + j]);
+        }
+        printf("\n");
+        //printf("]%s\n", (i == l.n-1)?"":",");
+    }
+    //printf("]");
 }
 
 void rescale_net(char *cfgfile, char *weightfile, char *outfile)
 {
     gpu_index = -1;
-    network * net = parse_network_cfg(cfgfile);
-    if(weightfile){
-        load_weights(net, weightfile);
-    }
+    network *net = load_network(cfgfile, weightfile, 0);
     int i;
     for(i = 0; i < net->n; ++i){
         layer l = net->layers[i];
@@ -214,10 +230,7 @@ void rescale_net(char *cfgfile, char *weightfile, char *outfile)
 void rgbgr_net(char *cfgfile, char *weightfile, char *outfile)
 {
     gpu_index = -1;
-    network * net = parse_network_cfg(cfgfile);
-    if(weightfile){
-        load_weights(net, weightfile);
-    }
+    network *net = load_network(cfgfile, weightfile, 0);
     int i;
     for(i = 0; i < net->n; ++i){
         layer l = net->layers[i];
@@ -233,10 +246,7 @@ void rgbgr_net(char *cfgfile, char *weightfile, char *outfile)
 void reset_normalize_net(char *cfgfile, char *weightfile, char *outfile)
 {
     gpu_index = -1;
-    network * net = parse_network_cfg(cfgfile);
-    if (weightfile) {
-        load_weights(net, weightfile);
-    }
+    network *net = load_network(cfgfile, weightfile, 0);
     int i;
     for (i = 0; i < net->n; ++i) {
         layer l = net->layers[i];
@@ -275,10 +285,7 @@ layer normalize_layer(layer l, int n)
 void normalize_net(char *cfgfile, char *weightfile, char *outfile)
 {
     gpu_index = -1;
-    network * net = parse_network_cfg(cfgfile);
-    if(weightfile){
-        load_weights(net, weightfile);
-    }
+    network *net = load_network(cfgfile, weightfile, 0);
     int i;
     for(i = 0; i < net->n; ++i){
         layer l = net->layers[i];
@@ -305,10 +312,7 @@ void normalize_net(char *cfgfile, char *weightfile, char *outfile)
 void statistics_net(char *cfgfile, char *weightfile)
 {
     gpu_index = -1;
-    network * net = parse_network_cfg(cfgfile);
-    if (weightfile) {
-        load_weights(net, weightfile);
-    }
+    network *net = load_network(cfgfile, weightfile, 0);
     int i;
     for (i = 0; i < net->n; ++i) {
         layer l = net->layers[i];
@@ -339,10 +343,7 @@ void statistics_net(char *cfgfile, char *weightfile)
 void denormalize_net(char *cfgfile, char *weightfile, char *outfile)
 {
     gpu_index = -1;
-    network * net = parse_network_cfg(cfgfile);
-    if (weightfile) {
-        load_weights(net, weightfile);
-    }
+    network *net = load_network(cfgfile, weightfile, 0);
     int i;
     for (i = 0; i < net->n; ++i) {
         layer l = net->layers[i];
@@ -376,7 +377,7 @@ void denormalize_net(char *cfgfile, char *weightfile, char *outfile)
 
 void mkimg(char *cfgfile, char *weightfile, int h, int w, int num, char *prefix)
 {
-    network * net = load_network(cfgfile, weightfile, 0);
+    network *net = load_network(cfgfile, weightfile, 0);
     image *ims = get_weights(net->layers[0]);
     int n = net->layers[0].n;
     int z;
@@ -403,10 +404,7 @@ void mkimg(char *cfgfile, char *weightfile, int h, int w, int num, char *prefix)
 
 void visualize(char *cfgfile, char *weightfile)
 {
-    network * net = parse_network_cfg(cfgfile);
-    if(weightfile){
-        load_weights(net, weightfile);
-    }
+    network *net = load_network(cfgfile, weightfile, 0);
     visualize_network(net);
 #ifdef OPENCV
     cvWaitKey(0);
@@ -440,8 +438,6 @@ int main(int argc, char **argv)
         average(argc, argv);
     } else if (0 == strcmp(argv[1], "yolo")){
         run_yolo(argc, argv);
-    } else if (0 == strcmp(argv[1], "voxel")){
-        run_voxel(argc, argv);
     } else if (0 == strcmp(argv[1], "super")){
         run_super(argc, argv);
     } else if (0 == strcmp(argv[1], "lsd")){
@@ -449,7 +445,7 @@ int main(int argc, char **argv)
     } else if (0 == strcmp(argv[1], "detector")){
         run_detector(argc, argv);
     } else if (0 == strcmp(argv[1], "detect")){
-        float thresh = find_float_arg(argc, argv, "-thresh", .24);
+        float thresh = find_float_arg(argc, argv, "-thresh", .5);
         char *filename = (argc > 4) ? argv[4]: 0;
         char *outfile = find_char_arg(argc, argv, "-out", 0);
         int fullscreen = find_arg(argc, argv, "-fullscreen");
@@ -460,8 +456,6 @@ int main(int argc, char **argv)
         run_go(argc, argv);
     } else if (0 == strcmp(argv[1], "rnn")){
         run_char_rnn(argc, argv);
-    } else if (0 == strcmp(argv[1], "vid")){
-        run_vid_rnn(argc, argv);
     } else if (0 == strcmp(argv[1], "coco")){
         run_coco(argc, argv);
     } else if (0 == strcmp(argv[1], "classify")){
@@ -476,12 +470,6 @@ int main(int argc, char **argv)
         run_art(argc, argv);
     } else if (0 == strcmp(argv[1], "tag")){
         run_tag(argc, argv);
-    } else if (0 == strcmp(argv[1], "compare")){
-        run_compare(argc, argv);
-    } else if (0 == strcmp(argv[1], "dice")){
-        run_dice(argc, argv);
-    } else if (0 == strcmp(argv[1], "writing")){
-        run_writing(argc, argv);
     } else if (0 == strcmp(argv[1], "3d")){
         composite_3d(argv[2], argv[3], argv[4], (argc > 5) ? atof(argv[5]) : 0);
     } else if (0 == strcmp(argv[1], "test")){
@@ -510,6 +498,8 @@ int main(int argc, char **argv)
         oneoff(argv[2], argv[3], argv[4]);
     } else if (0 == strcmp(argv[1], "oneoff2")){
         oneoff2(argv[2], argv[3], argv[4], atoi(argv[5]));
+    } else if (0 == strcmp(argv[1], "print")){
+        print_weights(argv[2], argv[3], atoi(argv[4]));
     } else if (0 == strcmp(argv[1], "partial")){
         partial(argv[2], argv[3], argv[4], atoi(argv[5]));
     } else if (0 == strcmp(argv[1], "average")){
