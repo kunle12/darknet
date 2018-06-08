@@ -797,6 +797,7 @@ float rand_uniform(float min, float max);
 
 void get_detection_boxes(layer l, int w, int h, float thresh, float **probs, box *boxes, int only_objectness);
 void get_region_boxes(layer l, int w, int h, int netw, int neth, float thresh, float **probs, box *boxes, float **masks, int only_objectness, int *map, float tree_thresh, int relative);
+int max_index(float *a, int n);
 
 #ifdef __cplusplus
 extern "C" {
@@ -809,7 +810,6 @@ image letterbox_image(image im, int w, int h);
 float *network_predict(network * net, float *input);
 detection *get_network_boxes(network *net, int w, int h, float thresh, float hier, int *map, int relative, int *num);
 void free_detections(detection *dets, int n);
-int max_index(float *a, int n);
 void free_image(image m);
 void do_nms_sort(detection *dets, int total, int classes, float thresh);
 double what_time_is_it_now();
