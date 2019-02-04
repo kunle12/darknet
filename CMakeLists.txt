@@ -54,7 +54,7 @@ include_directories(SYSTEM include ${OpenCV_INCLUDE_DIR})
 include_directories(src)
 set(SRC_DIR src)
 
-FILE(GLOB SRC_FILES ${SRC_DIR}/*.c)
+FILE(GLOB SRC_FILES ${SRC_DIR}/*.c ${SRC_DIR}/*.cpp)
 FILE(GLOB CU_SRC_FILES ${SRC_DIR}/*.cu)
 LIST(REMOVE_ITEM SRC_FILES "${PROJECT_SOURCE_DIR}/src/demo.c")
 
