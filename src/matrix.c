@@ -23,8 +23,8 @@ float matrix_topk_accuracy(matrix truth, matrix guess, int k)
     for(i = 0; i < truth.rows; ++i){
         top_k(guess.vals[i], n, k, indexes);
         for(j = 0; j < k; ++j){
-            int class = indexes[j];
-            if(truth.vals[i][class]){
+            int class_idx = indexes[j];
+            if(truth.vals[i][class_idx]){
                 ++correct;
                 break;
             }

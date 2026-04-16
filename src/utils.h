@@ -5,10 +5,6 @@
 #include "darknet.h"
 #include "list.h"
 
-#if defined (__cplusplus)
-extern "C" {
-#endif
-
 #define TIME(a) \
     do { \
     double start = what_time_is_it_now(); \
@@ -52,9 +48,5 @@ float **one_hot_encode(float *a, int n, int k);
 float sec(clock_t clocks);
 void print_statistics(float *a, int n);
 int int_index(int *a, int val, int n);
-
-#if defined (__cplusplus)
-}
-#endif
 
 #endif

@@ -1,11 +1,10 @@
-cmake_minimum_required(VERSION 2.8)
-project(yololib)
+cmake_minimum_required(VERSION 3.5)
+project(darknet_objects_detection LANGUAGES CXX)
 
-set(CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH} "${PROJECT_SOURCE_DIR}/CMake")
-set(CMAKE_LIBRARY_OUTPUT_DIRECTORY ${PROJECT_SOURCE_DIR}/lib)
-## Compiler settings
+set(CMAKE_CXX_STANDARD 11)
+set(CMAKE_CXX_STANDARD_REQUIRED ON)
 
-option(CPUOnly "CPUOnly" OFF)
+set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++11 -fpermissive")
 
 #thread
 FIND_PACKAGE(Threads)
@@ -57,6 +56,8 @@ set(SRC_DIR src)
 FILE(GLOB SRC_FILES ${SRC_DIR}/*.c ${SRC_DIR}/*.cpp)
 FILE(GLOB CU_SRC_FILES ${SRC_DIR}/*.cu)
 LIST(REMOVE_ITEM SRC_FILES "${PROJECT_SOURCE_DIR}/src/demo.c")
+
+set_source_files_properties(${SRC_FILES} PROPERTIES LANGUAGE CXX)
 
 if (CUDA_FOUND)
 message(STATUS "CUDA FOUND")

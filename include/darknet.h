@@ -805,9 +805,6 @@ void get_detection_boxes(layer l, int w, int h, float thresh, float **probs, box
 void get_region_boxes(layer l, int w, int h, int netw, int neth, float thresh, float **probs, box *boxes, float **masks, int only_objectness, int *map, float tree_thresh, int relative);
 int max_index(float *a, int n);
 
-#ifdef __cplusplus
-extern "C" {
-#endif
 network * load_network(char *cfg, char *weights, int clear);
 void set_batch_network(network * net, int b);
 void free_network(network * net);
@@ -824,12 +821,4 @@ void free_image(image m);
 void do_nms_sort(detection *dets, int total, int classes, float thresh);
 double what_time_is_it_now();
 
-#ifdef OPENCV
-#ifndef __NVCC__
-image ipl_to_image(IplImage* src);
-#endif
-#endif
-#ifdef __cplusplus
-}
-#endif
 #endif
