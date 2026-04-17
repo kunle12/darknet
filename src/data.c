@@ -363,6 +363,7 @@ box bound_image(image im)
 
 void fill_truth_iseg(char *path, int num_boxes, float *truth, int classes, int w, int h, augment_args aug, int flip, int mw, int mh)
 {
+    (void)classes;
     char labelpath[4096];
     find_replace(path, "images", "mask", labelpath);
     find_replace(labelpath, "JPEGImages", "mask", labelpath);
@@ -401,6 +402,7 @@ void fill_truth_iseg(char *path, int num_boxes, float *truth, int classes, int w
 
 void fill_truth_mask(char *path, int num_boxes, float *truth, int classes, int w, int h, augment_args aug, int flip, int mw, int mh)
 {
+    (void)classes;
     char labelpath[4096];
     find_replace(path, "images", "mask", labelpath);
     find_replace(labelpath, "JPEGImages", "mask", labelpath);
@@ -446,6 +448,7 @@ void fill_truth_mask(char *path, int num_boxes, float *truth, int classes, int w
 
 void fill_truth_detection(char *path, int num_boxes, float *truth, int classes, int flip, float dx, float dy, float sx, float sy)
 {
+    (void)classes;
     char labelpath[4096];
     find_replace(path, "images", "labels", labelpath);
     find_replace(labelpath, "JPEGImages", "labels", labelpath);
@@ -505,7 +508,7 @@ void fill_truth_captcha(char *path, int n, float *truth)
 {
     char *begin = strrchr(path, '/');
     ++begin;
-    int i;
+    size_t i;
     for(i = 0; i < strlen(begin) && i < n && begin[i] != '.'; ++i){
         int index = alphanum_to_int(begin[i]);
         if(index > 35) printf("Bad %c\n", begin[i]);
