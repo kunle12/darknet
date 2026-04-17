@@ -7,7 +7,7 @@
 #include <stdlib.h>
 #include <stdio.h>
 
-COST_TYPE get_cost_type(char *s)
+COST_TYPE get_cost_type(const char *s)
 {
     if (strcmp(s, "seg")==0) return SEG;
     if (strcmp(s, "sse")==0) return SSE;
@@ -19,7 +19,7 @@ COST_TYPE get_cost_type(char *s)
     return SSE;
 }
 
-char *get_cost_string(COST_TYPE a)
+const char *get_cost_string(COST_TYPE a)
 {
     switch(a){
         case SEG:
@@ -41,7 +41,7 @@ char *get_cost_string(COST_TYPE a)
 cost_layer make_cost_layer(int batch, int inputs, COST_TYPE cost_type, float scale)
 {
     fprintf(stderr, "cost                                           %4d\n",  inputs);
-    cost_layer l = {0};
+    cost_layer l = {};
     l.type = COST;
 
     l.scale = scale;
@@ -49,9 +49,9 @@ cost_layer make_cost_layer(int batch, int inputs, COST_TYPE cost_type, float sca
     l.inputs = inputs;
     l.outputs = inputs;
     l.cost_type = cost_type;
-    l.delta = calloc(inputs*batch, sizeof(float));
-    l.output = calloc(inputs*batch, sizeof(float));
-    l.cost = calloc(1, sizeof(float));
+    l.delta = (float*)calloc(inputs*batch, sizeof(float));
+    l.output = (float*)calloc(inputs*batch, sizeof(float));
+    l.cost = (float*)calloc(1, sizeof(float));
 
     l.forward = forward_cost_layer;
     l.backward = backward_cost_layer;
@@ -69,8 +69,8 @@ void resize_cost_layer(cost_layer *l, int inputs)
 {
     l->inputs = inputs;
     l->outputs = inputs;
-    l->delta = realloc(l->delta, inputs*l->batch*sizeof(float));
-    l->output = realloc(l->output, inputs*l->batch*sizeof(float));
+    l->delta = (float*)realloc(l->delta, inputs*l->batch*sizeof(float));
+    l->output = (float*)realloc(l->output, inputs*l->batch*sizeof(float));
 #ifdef GPU
     cuda_free(l->delta_gpu);
     cuda_free(l->output_gpu);

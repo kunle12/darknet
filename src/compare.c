@@ -12,7 +12,7 @@ void train_compare(char *cfgfile, char *weightfile)
     srand(time(0));
     float avg_loss = -1;
     char *base = basecfg(cfgfile);
-    char *backup_directory = "/home/kunle12/backup/";
+    const char *backup_directory = "/home/kunle12/backup/";
     printf("%s\n", base);
     network * net = parse_network_cfg(cfgfile);
     if(weightfile){
@@ -20,7 +20,7 @@ void train_compare(char *cfgfile, char *weightfile)
     }
     printf("Learning Rate: %g, Momentum: %g, Decay: %g\n", net->learning_rate, net->momentum, net->decay);
     int imgs = 1024;
-    list *plist = get_paths("data/compare.train.list");
+    list *plist = get_paths((char*)"data/compare.train.list");
     char **paths = (char **)list_to_array(plist);
     int N = plist->size;
     printf("%d\n", N);
@@ -87,7 +87,7 @@ void validate_compare(char *filename, char *weightfile)
     }
     srand(time(0));
 
-    list *plist = get_paths("data/compare.val.list");
+    list *plist = get_paths((char*)"data/compare.val.list");
     //list *plist = get_paths("data/compare.val.old");
     char **paths = (char **)list_to_array(plist);
     int N = plist->size/2;
@@ -176,7 +176,7 @@ int bbox_comparator(const void *a, const void *b)
 
     image im1 = load_image_color(box1.filename, net->w, net->h);
     image im2 = load_image_color(box2.filename, net->w, net->h);
-    float *X  = calloc(net->w*net->h*net->c, sizeof(float));
+    float *X  = (float*)calloc(net->w*net->h*net->c, sizeof(float));
     memcpy(X,                   im1.data, im1.w*im1.h*im1.c*sizeof(float));
     memcpy(X+im1.w*im1.h*im1.c, im2.data, im2.w*im2.h*im2.c*sizeof(float));
     float *predictions = network_predict(net, X);
@@ -205,7 +205,7 @@ void bbox_fight(network * net, sortable_bbox *a, sortable_bbox *b, int classes, 
 {
     image im1 = load_image_color(a->filename, net->w, net->h);
     image im2 = load_image_color(b->filename, net->w, net->h);
-    float *X  = calloc(net->w*net->h*net->c, sizeof(float));
+    float *X  = (float*)calloc(net->w*net->h*net->c, sizeof(float));
     memcpy(X,                   im1.data, im1.w*im1.h*im1.c*sizeof(float));
     memcpy(X+im1.w*im1.h*im1.c, im2.data, im2.w*im2.h*im2.c*sizeof(float));
     float *predictions = network_predict(net, X);
@@ -234,12 +234,12 @@ void SortMaster3000(char *filename, char *weightfile)
     srand(time(0));
     set_batch_network(net, 1);
 
-    list *plist = get_paths("data/compare.sort.list");
+    list *plist = get_paths((char*)"data/compare.sort.list");
     //list *plist = get_paths("data/compare.val.old");
     char **paths = (char **)list_to_array(plist);
     int N = plist->size;
     free_list(plist);
-    sortable_bbox *boxes = calloc(N, sizeof(sortable_bbox));
+    sortable_bbox *boxes = (sortable_bbox*)calloc(N, sizeof(sortable_bbox));
     printf("Sorting %d boxes...\n", N);
     for(i = 0; i < N; ++i){
         boxes[i].filename = paths[i];
@@ -264,9 +264,9 @@ void BattleRoyaleWithCheese(char *filename, char *weightfile)
         load_weights(net, weightfile);
     }
     srand(time(0));
-    set_batch_network(net, 1);
+  set_batch_network(net, 1);
 
-    list *plist = get_paths("data/compare.sort.list");
+   list *plist = get_paths((char*)"data/compare.sort.list");
     //list *plist = get_paths("data/compare.small.list");
     //list *plist = get_paths("data/compare.cat.list");
     //list *plist = get_paths("data/compare.val.old");
@@ -274,13 +274,13 @@ void BattleRoyaleWithCheese(char *filename, char *weightfile)
     int N = plist->size;
     int total = N;
     free_list(plist);
-    sortable_bbox *boxes = calloc(N, sizeof(sortable_bbox));
+    sortable_bbox *boxes = (sortable_bbox*)calloc(N, sizeof(sortable_bbox));
     printf("Battling %d boxes...\n", N);
     for(i = 0; i < N; ++i){
         boxes[i].filename = paths[i];
         boxes[i].net = net;
         boxes[i].classes = classes;
-        boxes[i].elos = calloc(classes, sizeof(float));;
+        boxes[i].elos = (float*)calloc(classes, sizeof(float));
         for(j = 0; j < classes; ++j){
             boxes[i].elos[j] = 1500;
         }

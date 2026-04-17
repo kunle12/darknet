@@ -135,7 +135,7 @@ local_layer parse_local(list *options, size_params params)
     int size = option_find_int(options, "size",1);
     int stride = option_find_int(options, "stride",1);
     int pad = option_find_int(options, "pad",0);
-    char *activation_s = option_find_str(options, "activation", "logistic");
+    const char *activation_s = option_find_str(options, "activation", "logistic");
     ACTIVATION activation = get_activation(activation_s);
 
     int batch,h,w,c;
@@ -156,7 +156,7 @@ layer parse_deconvolutional(list *options, size_params params)
     int size = option_find_int(options, "size",1);
     int stride = option_find_int(options, "stride",1);
 
-    char *activation_s = option_find_str(options, "activation", "logistic");
+    const char *activation_s = option_find_str(options, "activation", "logistic");
     ACTIVATION activation = get_activation(activation_s);
 
     int batch,h,w,c;
@@ -186,7 +186,7 @@ convolutional_layer parse_convolutional(list *options, size_params params)
     int groups = option_find_int_quiet(options, "groups", 1);
     if(pad) padding = size/2;
 
-    char *activation_s = option_find_str(options, "activation", "logistic");
+    const char *activation_s = option_find_str(options, "activation", "logistic");
     ACTIVATION activation = get_activation(activation_s);
 
     int batch,h,w,c;
@@ -210,7 +210,7 @@ layer parse_crnn(list *options, size_params params)
 {
     int output_filters = option_find_int(options, "output_filters",1);
     int hidden_filters = option_find_int(options, "hidden_filters",1);
-    char *activation_s = option_find_str(options, "activation", "logistic");
+    const char *activation_s = option_find_str(options, "activation", "logistic");
     ACTIVATION activation = get_activation(activation_s);
     int batch_normalize = option_find_int_quiet(options, "batch_normalize", 0);
 
@@ -224,7 +224,7 @@ layer parse_crnn(list *options, size_params params)
 layer parse_rnn(list *options, size_params params)
 {
     int output = option_find_int(options, "output",1);
-    char *activation_s = option_find_str(options, "activation", "logistic");
+    const char *activation_s = option_find_str(options, "activation", "logistic");
     ACTIVATION activation = get_activation(activation_s);
     int batch_normalize = option_find_int_quiet(options, "batch_normalize", 0);
 
@@ -259,7 +259,7 @@ layer parse_lstm(list *options, size_params params)
 layer parse_connected(list *options, size_params params)
 {
     int output = option_find_int(options, "output",1);
-    char *activation_s = option_find_str(options, "activation", "logistic");
+    const char *activation_s = option_find_str(options, "activation", "logistic");
     ACTIVATION activation = get_activation(activation_s);
     int batch_normalize = option_find_int_quiet(options, "batch_normalize", 0);
 
@@ -272,7 +272,7 @@ layer parse_softmax(list *options, size_params params)
     int groups = option_find_int_quiet(options, "groups",1);
     layer l = make_softmax_layer(params.batch, params.inputs, groups);
     l.temperature = option_find_float_quiet(options, "temperature", 1);
-    char *tree_file = option_find_str(options, "tree", 0);
+    const char *tree_file = option_find_str(options, "tree", 0);
     if (tree_file) l.softmax_tree = read_tree(tree_file);
     l.w = params.w;
     l.h = params.h;
@@ -282,7 +282,7 @@ layer parse_softmax(list *options, size_params params)
     return l;
 }
 
-int *parse_yolo_mask(char *a, int *num)
+int *parse_yolo_mask(const char *a, int *num)
 {
     int *mask = 0;
     if(a){
@@ -292,7 +292,7 @@ int *parse_yolo_mask(char *a, int *num)
         for(i = 0; i < len; ++i){
             if (a[i] == ',') ++n;
         }
-        mask = calloc(n, sizeof(int));
+        mask = (int*)calloc(n, sizeof(int));
         for(i = 0; i < n; ++i){
             int val = atoi(a);
             mask[i] = val;
@@ -309,7 +309,7 @@ layer parse_yolo(list *options, size_params params)
     int total = option_find_int(options, "num", 1);
     int num = total;
 
-    char *a = option_find_str(options, "mask", 0);
+    const char *a = option_find_str(options, "mask", 0);
     int *mask = parse_yolo_mask(a, &num);
     layer l = make_yolo_layer(params.batch, params.w, params.h, num, total, mask, classes);
     assert(l.outputs == params.inputs);
@@ -321,7 +321,7 @@ layer parse_yolo(list *options, size_params params)
     l.truth_thresh = option_find_float(options, "truth_thresh", 1);
     l.random = option_find_int_quiet(options, "random", 0);
 
-    char *map_file = option_find_str(options, "map", 0);
+    const char *map_file = option_find_str(options, "map", 0);
     if (map_file) l.map = read_map(map_file);
 
     a = option_find_str(options, "anchors", 0);
@@ -380,12 +380,12 @@ layer parse_region(list *options, size_params params)
     l.class_scale = option_find_float(options, "class_scale", 1);
     l.bias_match = option_find_int_quiet(options, "bias_match",0);
 
-    char *tree_file = option_find_str(options, "tree", 0);
+    const char *tree_file = option_find_str(options, "tree", 0);
     if (tree_file) l.softmax_tree = read_tree(tree_file);
-    char *map_file = option_find_str(options, "map", 0);
+    const char *map_file = option_find_str(options, "map", 0);
     if (map_file) l.map = read_map(map_file);
 
-    char *a = option_find_str(options, "anchors", 0);
+    const char *a = option_find_str(options, "anchors", 0);
     if(a){
         int len = strlen(a);
         int n = 1;
@@ -428,7 +428,7 @@ detection_layer parse_detection(list *options, size_params params)
 
 cost_layer parse_cost(list *options, size_params params)
 {
-    char *type_s = option_find_str(options, "type", "sse");
+    const char *type_s = option_find_str(options, "type", "sse");
     COST_TYPE type = get_cost_type(type_s);
     float scale = option_find_float_quiet(options, "scale",1);
     cost_layer layer = make_cost_layer(params.batch, params.inputs, type, scale);
@@ -538,7 +538,7 @@ layer parse_batchnorm(list *options, size_params params)
 
 layer parse_shortcut(list *options, size_params params, network *net)
 {
-    char *l = option_find(options, "from");
+    const char *l = option_find(options, "from");
     int index = atoi(l);
     if(index < 0) index = params.index + index;
 
@@ -547,7 +547,7 @@ layer parse_shortcut(list *options, size_params params, network *net)
 
     layer s = make_shortcut_layer(batch, index, params.w, params.h, params.c, from.out_w, from.out_h, from.out_c);
 
-    char *activation_s = option_find_str(options, "activation", "linear");
+    const char *activation_s = option_find_str(options, "activation", "linear");
     ACTIVATION activation = get_activation(activation_s);
     s.activation = activation;
     s.alpha = option_find_float_quiet(options, "alpha", 1);
@@ -577,7 +577,7 @@ layer parse_logistic(list *options, size_params params)
 
 layer parse_activation(list *options, size_params params)
 {
-    char *activation_s = option_find_str(options, "activation", "linear");
+    const char *activation_s = option_find_str(options, "activation", "linear");
     ACTIVATION activation = get_activation(activation_s);
 
     layer l = make_activation_layer(params.batch, params.inputs, activation);
@@ -600,7 +600,7 @@ layer parse_upsample(list *options, size_params params, network *net)
 
 route_layer parse_route(list *options, size_params params, network *net)
 {
-    char *l = option_find(options, "layers");
+    const char *l = option_find(options, "layers");
     int len = strlen(l);
     if(!l) error("Route Layer must specify input layers");
     int n = 1;
@@ -609,8 +609,8 @@ route_layer parse_route(list *options, size_params params, network *net)
         if (l[i] == ',') ++n;
     }
 
-    int *layers = calloc(n, sizeof(int));
-    int *sizes = calloc(n, sizeof(int));
+    int *layers = (int*)calloc(n, sizeof(int));
+    int *sizes = (int*)calloc(n, sizeof(int));
     for(i = 0; i < n; ++i){
         int index = atoi(l);
         l = strchr(l, ',')+1;
@@ -639,7 +639,7 @@ route_layer parse_route(list *options, size_params params, network *net)
     return layer;
 }
 
-learning_rate_policy get_policy(char *s)
+learning_rate_policy get_policy(const char *s)
 {
     if (strcmp(s, "random")==0) return RANDOM;
     if (strcmp(s, "poly")==0) return POLY;
@@ -692,7 +692,7 @@ void parse_net_options(list *options, network *net)
 
     if(!net->inputs && !(net->h && net->w && net->c)) error("No input parameters supplied");
 
-    char *policy_s = option_find_str(options, "policy", "constant");
+    const char *policy_s = option_find_str(options, "policy", "constant");
     net->policy = get_policy(policy_s);
     net->burn_in = option_find_int_quiet(options, "burn_in", 0);
     net->power = option_find_float_quiet(options, "power", 4);
@@ -700,8 +700,8 @@ void parse_net_options(list *options, network *net)
         net->step = option_find_int(options, "step", 1);
         net->scale = option_find_float(options, "scale", 1);
     } else if (net->policy == STEPS){
-        char *l = option_find(options, "steps");
-        char *p = option_find(options, "scales");
+        const char *l = option_find(options, "steps");
+        const char *p = option_find(options, "scales");
         if(!l || !p) error("STEPS policy must have steps and scales in cfg file");
 
         int len = strlen(l);
@@ -710,8 +710,8 @@ void parse_net_options(list *options, network *net)
         for(i = 0; i < len; ++i){
             if (l[i] == ',') ++n;
         }
-        int *steps = calloc(n, sizeof(int));
-        float *scales = calloc(n, sizeof(float));
+        int *steps = (int*)calloc(n, sizeof(int));
+        float *scales = (float*)calloc(n, sizeof(float));
         for(i = 0; i < n; ++i){
             int step    = atoi(l);
             float scale = atof(p);
@@ -771,7 +771,7 @@ network * parse_network_cfg(char *filename)
         fprintf(stderr, "%5d ", count);
         s = (section *)n->val;
         options = s->options;
-        layer l = {0};
+        layer l = {};
         LAYER_TYPE lt = string_to_layer_type(s->type);
         if(lt == CONVOLUTIONAL){
             l = parse_convolutional(options, params);
@@ -866,8 +866,8 @@ network * parse_network_cfg(char *filename)
     net->truths = out.outputs;
     if(net->layers[net->n-1].truths) net->truths = net->layers[net->n-1].truths;
     net->output = out.output;
-    net->input = calloc(net->inputs*net->batch, sizeof(float));
-    net->truth = calloc(net->truths*net->batch, sizeof(float));
+    net->input = (float*)calloc(net->inputs*net->batch, sizeof(float));
+    net->truth = (float*)calloc(net->truths*net->batch, sizeof(float));
 #ifdef GPU
     net->output_gpu = out.output_gpu;
     net->input_gpu = cuda_make_array(net->input, net->inputs*net->batch);
@@ -879,10 +879,10 @@ network * parse_network_cfg(char *filename)
         if(gpu_index >= 0){
             net->workspace = cuda_make_array(0, (workspace_size-1)/sizeof(float)+1);
         }else {
-            net->workspace = calloc(1, workspace_size);
+            net->workspace = (float*)calloc(1, workspace_size);
         }
 #else
-        net->workspace = calloc(1, workspace_size);
+        net->workspace = (float*)calloc(1, workspace_size);
 #endif
     }
     return net;
@@ -901,7 +901,7 @@ list *read_cfg(char *filename)
         strip(line);
         switch(line[0]){
             case '[':
-                current = malloc(sizeof(section));
+                current = (section*)malloc(sizeof(section));
                 list_insert(options, current);
                 current->options = make_list();
                 current->type = line;
@@ -1084,7 +1084,7 @@ void save_weights(network *net, char *filename)
 
 void transpose_matrix(float *a, int rows, int cols)
 {
-    float *transpose = calloc(rows*cols, sizeof(float));
+    float *transpose = (float*)calloc(rows*cols, sizeof(float));
     int x, y;
     for(x = 0; x < rows; ++x){
         for(y = 0; y < cols; ++y){

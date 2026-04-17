@@ -52,7 +52,7 @@ typedef struct{
     int *group_size;
     int *group_offset;
 } tree;
-tree *read_tree(char *filename);
+tree *read_tree(const char *filename);
 
 typedef enum{
     LOGISTIC, RELU, RELIE, LINEAR, RAMP, TANH, PLSE, LEAKY, ELU, LOGGY, STAIR, HARDTAN, LHTAN, SELU
@@ -775,14 +775,14 @@ float find_float_arg(int argc, char **argv, char *arg, float def);
 int find_arg(int argc, char* argv[], char *arg);
 char *find_char_arg(int argc, char **argv, char *arg, char *def);
 char *basecfg(char *cfgfile);
-void find_replace(char *str, char *orig, char *rep, char *output);
+void find_replace(char *str, const char *orig, const char *rep, char *output);
 void free_ptrs(void **ptrs, int n);
 char *fgetl(FILE *fp);
 void strip(char *s);
 float sec(clock_t clocks);
 void **list_to_array(list *l);
 void top_k(float *a, int n, int k, int *index);
-int *read_map(char *filename);
+int *read_map(const char *filename);
 void error(const char *s);
 //int max_index(float *a, int n);
 int max_int_index(int *a, int n);

@@ -4,7 +4,7 @@
 #include "cuda.h"
 #include "math.h"
 
-ACTIVATION get_activation(char *s);
+ACTIVATION get_activation(const char *s);
 
 char *get_activation_string(ACTIVATION a);
 float activate(float x, ACTIVATION a);

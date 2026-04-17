@@ -9,40 +9,40 @@ char *get_activation_string(ACTIVATION a)
 {
     switch(a){
         case LOGISTIC:
-            return "logistic";
+            return (char*)"logistic";
         case LOGGY:
-            return "loggy";
+            return (char*)"loggy";
         case RELU:
-            return "relu";
+            return (char*)"relu";
         case ELU:
-            return "elu";
+            return (char*)"elu";
         case SELU:
-            return "selu";
+            return (char*)"selu";
         case RELIE:
-            return "relie";
+            return (char*)"relie";
         case RAMP:
-            return "ramp";
+            return (char*)"ramp";
         case LINEAR:
-            return "linear";
+            return (char*)"linear";
         case TANH:
-            return "tanh";
+            return (char*)"tanh";
         case PLSE:
-            return "plse";
+            return (char*)"plse";
         case LEAKY:
-            return "leaky";
+            return (char*)"leaky";
         case STAIR:
-            return "stair";
+            return (char*)"stair";
         case HARDTAN:
-            return "hardtan";
+            return (char*)"hardtan";
         case LHTAN:
-            return "lhtan";
+            return (char*)"lhtan";
         default:
             break;
     }
-    return "relu";
+    return (char*)"relu";
 }
 
-ACTIVATION get_activation(char *s)
+ACTIVATION get_activation(const char *s)
 {
     if (strcmp(s, "logistic")==0) return LOGISTIC;
     if (strcmp(s, "loggy")==0) return LOGGY;

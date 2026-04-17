@@ -37,12 +37,12 @@ metadata get_metadata(char *file)
     metadata m = {0};
     list *options = read_data_cfg(file);
 
-    char *name_list = option_find_str(options, "names", 0);
+    const char *name_list = option_find_str(options, "names", 0);
     if(!name_list) name_list = option_find_str(options, "labels", 0);
     if(!name_list) {
         fprintf(stderr, "No names or labels found\n");
     } else {
-        m.names = get_labels(name_list);
+        m.names = get_labels((char *)name_list);
     }
     m.classes = option_find_int(options, "classes", 2);
     free_list(options);
@@ -53,7 +53,7 @@ int read_option(char *s, list *options)
 {
     size_t i;
     size_t len = strlen(s);
-    char *val = 0;
+    const char *val = 0;
     for(i = 0; i < len; ++i){
         if(s[i] == '='){
             s[i] = '\0';
@@ -63,13 +63,13 @@ int read_option(char *s, list *options)
     }
     if(i == len-1) return 0;
     char *key = s;
-    option_insert(options, key, val);
+    option_insert(options, key, (char *)val);
     return 1;
 }
 
 void option_insert(list *l, char *key, char *val)
 {
-    kvp *p = malloc(sizeof(kvp));
+    kvp *p = (kvp *)malloc(sizeof(kvp));
     p->key = key;
     p->val = val;
     p->used = 0;
@@ -88,7 +88,7 @@ void option_unused(list *l)
     }
 }
 
-char *option_find(list *l, char *key)
+const char *option_find(list *l, const char *key)
 {
     node *n = l->front;
     while(n){
@@ -101,39 +101,39 @@ char *option_find(list *l, char *key)
     }
     return 0;
 }
-char *option_find_str(list *l, char *key, char *def)
+const char *option_find_str(list *l, const char *key, const char *def)
 {
-    char *v = option_find(l, key);
+    const char *v = option_find(l, key);
     if(v) return v;
     if(def) fprintf(stderr, "%s: Using default '%s'\n", key, def);
     return def;
 }
 
-int option_find_int(list *l, char *key, int def)
+int option_find_int(list *l, const char *key, int def)
 {
-    char *v = option_find(l, key);
+    const char *v = option_find(l, key);
     if(v) return atoi(v);
     fprintf(stderr, "%s: Using default '%d'\n", key, def);
     return def;
 }
 
-int option_find_int_quiet(list *l, char *key, int def)
+int option_find_int_quiet(list *l, const char *key, int def)
 {
-    char *v = option_find(l, key);
+    const char *v = option_find(l, key);
     if(v) return atoi(v);
     return def;
 }
 
-float option_find_float_quiet(list *l, char *key, float def)
+float option_find_float_quiet(list *l, const char *key, float def)
 {
-    char *v = option_find(l, key);
+    const char *v = option_find(l, key);
     if(v) return atof(v);
     return def;
 }
 
-float option_find_float(list *l, char *key, float def)
+float option_find_float(list *l, const char *key, float def)
 {
-    char *v = option_find(l, key);
+    const char *v = option_find(l, key);
     if(v) return atof(v);
     fprintf(stderr, "%s: Using default '%lf'\n", key, def);
     return def;
