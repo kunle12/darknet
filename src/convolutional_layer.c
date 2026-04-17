@@ -146,30 +146,37 @@ void cudnn_convolutional_setup(layer *l)
     }
     #endif
 
-    cudnnGetConvolutionForwardAlgorithm(cudnn_handle(),
+    cudnnConvolutionFwdAlgoPerf_t perf_fw[1];
+    cudnnConvolutionBwdDataAlgoPerf_t perf_bd[1];
+    cudnnConvolutionBwdFilterAlgoPerf_t perf_bf[1];
+    int n_fw = 0, n_bd = 0, n_bf = 0;
+    cudnnGetConvolutionForwardAlgorithm_v7(cudnn_handle(),
             l->srcTensorDesc,
             l->weightDesc,
             l->convDesc,
             l->dstTensorDesc,
-            CUDNN_CONVOLUTION_FWD_SPECIFY_WORKSPACE_LIMIT,
-            2000000000,
-            &l->fw_algo);
-    cudnnGetConvolutionBackwardDataAlgorithm(cudnn_handle(),
+            1,
+            &n_fw,
+            perf_fw);
+    l->fw_algo = perf_fw[0].algo;
+    cudnnGetConvolutionBackwardDataAlgorithm_v7(cudnn_handle(),
             l->weightDesc,
             l->ddstTensorDesc,
             l->convDesc,
             l->dsrcTensorDesc,
-            CUDNN_CONVOLUTION_BWD_DATA_SPECIFY_WORKSPACE_LIMIT,
-            2000000000,
-            &l->bd_algo);
-    cudnnGetConvolutionBackwardFilterAlgorithm(cudnn_handle(),
+            1,
+            &n_bd,
+            perf_bd);
+    l->bd_algo = perf_bd[0].algo;
+    cudnnGetConvolutionBackwardFilterAlgorithm_v7(cudnn_handle(),
             l->srcTensorDesc,
             l->ddstTensorDesc,
             l->convDesc,
             l->dweightDesc,
-            CUDNN_CONVOLUTION_BWD_FILTER_SPECIFY_WORKSPACE_LIMIT,
-            2000000000,
-            &l->bf_algo);
+            1,
+            &n_bf,
+            perf_bf);
+    l->bf_algo = perf_bf[0].algo;
 }
 #endif
 #endif
