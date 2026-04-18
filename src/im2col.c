@@ -2,6 +2,7 @@
 #include <stdio.h>
 float im2col_get_pixel(float *im, int height, int width, int channels, int row,
                        int col, int channel, int pad) {
+  (void)channels;
   row -= pad;
   col -= pad;
 

@@ -632,7 +632,8 @@ matrix load_regression_labels_paths(char **paths, int n, int k) {
 
     FILE *file = fopen(labelpath, "r");
     for (j = 0; j < k; ++j) {
-      fscanf(file, "%f", &(y.vals[i][j]));
+      int r = fscanf(file, "%f", &(y.vals[i][j]));
+      (void)r;
     }
     fclose(file);
   }
@@ -1605,15 +1606,17 @@ data load_cifar10_data(char *filename) {
   FILE *fp = fopen(filename, "rb");
   if (!fp)
     file_error(filename);
+  size_t n;
   for (i = 0; i < 10000; ++i) {
     unsigned char bytes[3073];
-    fread(bytes, 1, 3073, fp);
+    n = fread(bytes, 1, 3073, fp);
     int class_id = bytes[0];
     y.vals[i][class_id] = 1;
     for (j = 0; j < X.cols; ++j) {
       X.vals[i][j] = (double)bytes[j + 1];
     }
   }
+  (void)n;
   scale_data_rows(d, 1. / 255);
   // normalize_data_rows(d);
   fclose(fp);
@@ -1672,7 +1675,8 @@ data load_all_cifar10() {
       file_error(buff);
     for (i = 0; i < 10000; ++i) {
       unsigned char bytes[3073];
-      fread(bytes, 1, 3073, fp);
+      size_t n = fread(bytes, 1, 3073, fp);
+      (void)n;
       int class_id = bytes[0];
       y.vals[i + b * 10000][class_id] = 1;
       for (j = 0; j < X.cols; ++j) {

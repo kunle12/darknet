@@ -7,6 +7,7 @@
 
 void gemm_bin(int M, int N, int K, float ALPHA, char *A, int lda, float *B,
               int ldb, float *C, int ldc) {
+  (void)ALPHA;
   int i, j, k;
   for (i = 0; i < M; ++i) {
     for (k = 0; k < K; ++k) {

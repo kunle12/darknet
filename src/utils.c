@@ -251,7 +251,8 @@ unsigned char *read_file(char *filename) {
   fseek(fp, 0, SEEK_SET);
 
   unsigned char *text = (unsigned char *)calloc(size + 1, sizeof(char));
-  fread(text, 1, size, fp);
+  size_t n = fread(text, 1, size, fp);
+  (void)n;
   fclose(fp);
   return text;
 }
@@ -339,7 +340,8 @@ char *fgetl(FILE *fp) {
     size_t readsize = size - curr;
     if (readsize > INT_MAX)
       readsize = INT_MAX - 1;
-    fgets(&line[curr], readsize, fp);
+    char *r = fgets(&line[curr], readsize, fp);
+    (void)r;
     curr = strlen(line);
   }
   if (line[curr - 1] == '\n')

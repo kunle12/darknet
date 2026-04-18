@@ -76,7 +76,8 @@ image load_image_cv(char *filename, int channels)
         fprintf(stderr, "Cannot load image \"%s\"\n", filename);
         char buff[256];
         sprintf(buff, "echo %s >> bad.list", filename);
-        system(buff);
+        int r = system(buff);
+        (void)r;
         return make_image(10,10,3);
     }
     image im = mat_to_image(m);

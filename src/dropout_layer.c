@@ -26,6 +26,7 @@ dropout_layer make_dropout_layer(int batch, int inputs, float probability) {
 }
 
 void resize_dropout_layer(dropout_layer *l, int inputs) {
+  (void)inputs;
   l->rand = (float *)realloc(l->rand, l->inputs * l->batch * sizeof(float));
 #ifdef GPU
   cuda_free(l->rand_gpu);

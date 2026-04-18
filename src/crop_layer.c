@@ -9,8 +9,14 @@ image get_crop_image(crop_layer l) {
   return float_to_image(w, h, c, l.output);
 }
 
-void backward_crop_layer(const crop_layer l, network *net) {}
-void backward_crop_layer_gpu(const crop_layer l, network *net) {}
+void backward_crop_layer(const crop_layer l, network *net) {
+  (void)l;
+  (void)net;
+}
+void backward_crop_layer_gpu(const crop_layer l, network *net) {
+  (void)l;
+  (void)net;
+}
 
 crop_layer make_crop_layer(int batch, int h, int w, int c, int crop_height,
                            int crop_width, int flip, float angle,
