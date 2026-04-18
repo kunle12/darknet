@@ -15,6 +15,7 @@ image mat_to_image(Mat src)
     int c = src.channels();
     image im = make_image(w, h, c);
     int step = src.step[0];
+    (void)step;
     int i, j, k;
 
     for(i = 0; i < h; ++i){
