@@ -1165,7 +1165,7 @@ void load_connected_weights(layer l, FILE *fp, int transpose) {
   // variance_array(l.biases, l.outputs)); printf("Weights: %f mean %f
   // variance\n", mean_array(l.weights, l.outputs*l.inputs),
   // variance_array(l.weights, l.outputs*l.inputs));
- if (l.batch_normalize && (!l.dontloadscales)) {
+  if (l.batch_normalize && (!l.dontloadscales)) {
     n = fread(l.scales, sizeof(float), l.outputs, fp);
     n = fread(l.rolling_mean, sizeof(float), l.outputs, fp);
     n = fread(l.rolling_variance, sizeof(float), l.outputs, fp);

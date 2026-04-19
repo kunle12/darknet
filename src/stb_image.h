@@ -6964,7 +6964,8 @@ static stbi_uc *stbi__process_gif_raster(stbi__context *s, stbi__gif *g) {
 // doesn't support it two back is the image from two frames ago, used for a very
 // specific disposal format
 static stbi_uc *stbi__gif_load_next(stbi__context *s, stbi__gif *g, int *comp,
-                                    int req_comp, stbi_uc *two_back) {
+                                    int req_comp_, stbi_uc *two_back) {
+  (void)req_comp_;
   int dispose;
   int first_frame;
   int pi;
@@ -7204,6 +7205,8 @@ static void *stbi__load_gif_main(stbi__context *s, int **delays, int *x, int *y,
 
 static void *stbi__gif_load(stbi__context *s, int *x, int *y, int *comp,
                             int req_comp, stbi__result_info *ri) {
+  (void)req_comp;
+  (void)ri;
   stbi_uc *u = 0;
   stbi__gif g;
   memset(&g, 0, sizeof(g));
